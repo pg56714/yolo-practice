@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>YoloV8</title>
+
+    <!-- Bootstrap CSS -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
+    <style>
+      input::file-selector-button {
+        font-weight: bold;
+        color: white;
+        background-color: black;
+        padding: 0.5em;
+        border: thin solid grey;
+        border-radius: 15px;
+        display: inline-block;
+        font-weight: bold;
+        font-size: 1.2rem;
+        line-height: 1.5;
+        color: #212529;
+        text-align: center;
+        text-decoration: none;
+        vertical-align: middle;
+        cursor: pointer;
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        user-select: none;
+        background-color: transparent;
+        border: 1px solid transparent;
+        padding: 0.375rem 0.75rem;
+        transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out,
+          border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+        color: #fff;
+        background-color: #212529;
+        border-color: #212529;
+      }
+
+      .btndarkCustom {
+        color: #fff;
+        background-color: #212529;
+        border-color: #212529;
+      }
+
+      .btnCustom {
+        display: inline-block;
+        font-weight: 400;
+        line-height: 1.5;
+        color: #212529;
+        text-align: center;
+        text-decoration: none;
+        vertical-align: middle;
+        cursor: pointer;
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        user-select: none;
+        background-color: white;
+        border: 1px;
+        padding: 0.375rem 0.75rem;
+        font-size: 1rem;
+        border-radius: 15px;
+        transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out,
+          border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+      }
+
+      .progress-barCustom {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        overflow: hidden;
+        color: rgb(0, 0, 0);
+        text-align: center;
+        white-space: nowrap;
+        background-color: #000000;
+        transition: width 0.6s ease;
+      }
+
+      /*Chrome*/
+      @media screen and (-webkit-min-device-pixel-ratio: 0.3) {
+        input[type="range"] {
+          overflow: hidden;
+          width: 150px;
+          background-color: #eeecef;
+          border-radius: 10px;
+        }
+
+        input[type="range"]::-webkit-slider-runnable-track {
+          height: 20px;
+          -webkit-appearance: none;
+          color: #282828;
+          margin-top: 0px;
+          border-radius: 10px;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+          width: 20px;
+          -webkit-appearance: none;
+          height: 20px;
+          cursor: ew-resize;
+          background: #8876fe;
+          box-shadow: -80px 0 0 72px #282828;
+          border-radius: 10px;
+        }
+      }
+
+      /** FF*/
+      input[type="range"]::-moz-range-progress {
+        background-color: #000000;
+      }
+
+      input[type="range"]::-moz-range-track {
+        background-color: #9a905d;
+      }
+
+      /* IE*/
+      input[type="range"]::-ms-fill-lower {
+        background-color: #000000;
+      }
+
+      input[type="range"]::-ms-fill-upper {
+        background-color: #9a905d;
+      }
+
+      .iconClass {
+        width: 100%;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container" style="font-family: 'SF Pro Display', sans-serif">
+      <div class="row">
+        <div class="col-sm" style="border: 5px">
+          <div>
+            <h2 style="font-weight: 900">Waste Dectection</h2>
+          </div>
+          <div>
+            <img
+              id="videoFeed"
+              src="{{ url_for('video') }}"
+              style="
+                width: auto;
+                height: auto;
+                border-radius: 35px;
+                max-width: 500px;
+                max-height: 500px;
+                object-fit: contain;
+              "
+              onerror="this.onerror=null; this.src='../static/files/Black.png'"
+              alt="Upload video"
+            />
+          </div>
+        </div>
+        <div class="col-sm">
+          <div class="flex-column">
+            <div style="margin-top: 70px; text-align: center">
+              <div
+                style="width: 5em; border-radius: 20px"
+                class="shadow-lg p-2 mb-5 bg-body"
+              >
+                <img
+                  src="{{ url_for('static', filename='files/plastic.png') }}"
+                  class="iconClass"
+                />
+                <div
+                  style="font-weight: 900; font-size: x-large; line-height: 1.5"
+                >
+                  <span id="glassCount">0</span>
+                </div>
+              </div>
+            </div>
+            <div style="text-align: center">
+              <div
+                style="width: 5em; border-radius: 20px"
+                class="shadow-lg p-2 mb-5 bg-body"
+              >
+                <img
+                  src="{{ url_for('static', filename='files/metal.png') }}"
+                  class="iconClass"
+                />
+                <div
+                  style="font-weight: 900; font-size: x-large; line-height: 1.5"
+                >
+                  <span id="metalCount">0</span>
+                </div>
+              </div>
+            </div>
+            <div style="text-align: center">
+              <div
+                style="width: 5em; border-radius: 20px"
+                class="shadow-lg p-2 mb-5 bg-body"
+              >
+                <img
+                  src="{{ url_for('static', filename='files/biodegradable.png') }}"
+                  class="iconClass"
+                />
+                <div
+                  style="font-weight: 900; font-size: x-large; line-height: 1.5"
+                >
+                  <span id="degradableCount">0</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="row mt-5 align-middle" style="text-align: center">
+        <form
+          method="POST"
+          enctype="multipart/form-data"
+          style="align-content: center; text-align: center; display: flex"
+        >
+          {{form.hidden_tag()}} {{form.file(class_="custom-file-input")}}
+
+          <div style="margin-top: 6px">
+            <b style="font-size: 1.2rem; line-height: 1.5; margin-top: 8px">
+              {{form.conf_slide.label}}
+            </b>
+            {{ form.conf_slide(min=0, max=100, oninput="outputUpdate(value)") }}
+          </div>
+
+          <div style="width: 50px; margin-top: 5px">
+            <output for="conf_slide" id="selected-age">
+              {{form.conf_slide.data }}
+            </output>
+          </div>
+          <div style="margin-top: -8px">
+            <button
+              type="submit"
+              name="favorite"
+              value="x"
+              class="btnCustom"
+              style="width: 100px"
+            >
+              <img
+                src="https://www.freepnglogos.com/uploads/play-button-png/youtube-style-play-button-clip-art-clkerm-vector-clip-art-online-royalty-31.png"
+                width="55"
+                style="border-radius: 15px"
+                alt="Play"
+              />
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script type="text/javascript">
+      function outputUpdate(vol) {
+        document.querySelector("#selected-age").value = vol;
+      }
+
+      var socket = io();
+
+      socket.on("update_data", function (data) {
+        $("#metalCount").text(data.metal);
+        $("#glassCount").text(data.glass);
+        $("#degradableCount").text(data.degradable);
+      });
+    </script>
+  </body>
+</html>

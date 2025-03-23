@@ -1,0 +1,12 @@
+ultralytics
+flask
+flask_wtf
+tensorrt
+tf_keras
+sng4onnx
+onnx_graphsurgeon
+onnx2tf==1.22.0
+onnxslim
+tflite_support
+onnxruntime-gpu
+openvino
